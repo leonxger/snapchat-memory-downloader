@@ -5,6 +5,11 @@
 This tool helps you download your Snapchat memories to your computer. It works on **Windows**, **Mac**, and **Linux**.
 
 ---
+#### ❤️ If you wanna support me (FREE):
+
+> **check out my music** (mostly dnb) **and possible some other links in the future:** [Linktree](https://linktr.ee/sslax)
+
+---
 
 ## ⚠️ Snapchat Is Deleting Your Memories — Act Now!
 
