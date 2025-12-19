@@ -620,38 +620,44 @@ while [[ ${#CSV_LINES[@]} -gt 0 ]]; do
     BATCH_SUCCESS=0
     BATCH_FAIL=0
     
+    # Collect results - O(1) lookup with associative array
+    BATCH_SUCCESS=0
+    BATCH_FAIL=0
+
     for id in "${BATCH_IDS[@]}"; do
-        local result_file="${TEMP_DIR}/result_${id}"
-        
+        # FIXED: Removed 'local'
+        result_file="${TEMP_DIR}/result_${id}"
+
         if [[ -f "$result_file" ]]; then
-            local result
+            # FIXED: Removed 'local'
             result=$(cat "$result_file")
             rm -f "$result_file"
-            
+
             IFS='|' read -r status item_id code info1 info2 elapsed file_size <<< "$result"
-            
-            local elapsed_fmt
+
+            # FIXED: Removed 'local'
             elapsed_fmt=$(format_elapsed "$elapsed")
-            
+
             if [[ "$status" == "OK" ]]; then
                 SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
                 BATCH_SUCCESS=$((BATCH_SUCCESS + 1))
                 TOTAL_BYTES=$((TOTAL_BYTES + file_size))
-                
+
                 # Mark as successful in associative array (O(1))
                 SUCCESSFUL_MAP["$id"]=1
-                
-                local size_str=""
+
+                # FIXED: Removed 'local'
+                size_str=""
                 if [[ $file_size -gt 0 ]]; then
                     size_str=" $(format_bytes $file_size)"
                 fi
-                
+
                 echo -e "  ${GREEN}✓${NC} ${GRAY}${id:0:8}...${NC} ${GREEN}${info1}${NC}${size_str} ${GRAY}(${elapsed_fmt})${NC}"
             else
                 FAILED_COUNT=$((FAILED_COUNT + 1))
                 BATCH_FAIL=$((BATCH_FAIL + 1))
                 SEQUENCE_COUNTER=$((SEQUENCE_COUNTER - 1))
-                
+
                 echo -e "  ${RED}✗${NC} ${GRAY}${id:0:8}...${NC} ${RED}${info1}${NC} ${GRAY}(${elapsed_fmt})${NC}"
             fi
         else
@@ -665,12 +671,16 @@ while [[ ${#CSV_LINES[@]} -gt 0 ]]; do
     # Remove successful items - O(n) instead of O(n²)
     declare -a NEW_CSV_LINES=()
     for line in "${CSV_LINES[@]}"; do
-        local line_id="${line%%,*}"
+        # FIXED: Removed 'local' keyword (we are in main scope)
+        line_id="${line%%,*}"
         line_id="${line_id//\"/}"
-        
-        # O(1) associative array lookup
-        if [[ -z "${SUCCESSFUL_MAP[$line_id]:-}" ]]; then
-            NEW_CSV_LINES+=("$line")
+
+        # FIXED: Added check to ensure ID is not empty to prevent 'bad array subscript'
+        if [[ -n "$line_id" ]]; then
+            # O(1) associative array lookup
+            if [[ -z "${SUCCESSFUL_MAP[$line_id]:-}" ]]; then
+                NEW_CSV_LINES+=("$line")
+            fi
         fi
     done
     
